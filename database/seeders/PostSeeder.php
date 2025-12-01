@@ -10,7 +10,7 @@ class PostSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('posts')->insert([
+        DB::table('posts')->in  sert([
             [
                 'topic_id' => 1,
                 'title' => 'Lợi ích của Whey Protein',

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductImageController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,3 +66,18 @@ Route::middleware('auth:sanctum')->group(function () {
 */
 
 Route::post('/upload-image', [ProductImageController::class, 'uploadImage']);
+
+
+
+/////////////////pos
+Route::prefix('posts')->group(function () {
+    // Client
+    Route::get('/', [PostController::class, 'index']);
+    Route::get('/{slug}', [PostController::class, 'show']);
+
+    // Admin (nếu muốn bảo vệ bằng sanctum => bọc trong middleware auth:sanctum)
+    Route::post('/', [PostController::class, 'store']);
+    Route::put('/{post}', [PostController::class, 'update']);
+    Route::delete('/{post}', [PostController::class, 'destroy']);
+});
+

@@ -9,29 +9,34 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up()
+public function up()
 {
     Schema::create('posts', function (Blueprint $table) {
         $table->id();
+
+        // Nếu không dùng topic_id thì có thể giữ nullable
         $table->unsignedInteger('topic_id')->nullable();
+
         $table->string('title');
-        $table->string('slug');
-        $table->string('image');
-        $table->longText('content');
-        $table->tinyText('description')->nullable();
+        $table->string('slug')->unique();
+
+        // khớp với PostController
+        $table->string('thumbnail')->nullable();   
+        $table->text('excerpt')->nullable();
+        $table->longText('content')->nullable();
+
         $table->enum('post_type', ['post', 'page'])->default('post');
-        $table->timestamps();
-        $table->unsignedInteger('created_by')->default(1);
+        $table->tinyInteger('status')->default(1);
+
+        $table->unsignedInteger('created_by')->nullable();
         $table->unsignedInteger('updated_by')->nullable();
-        $table->unsignedTinyInteger('status')->default(1);
+
+        $table->timestamps();
     });
 }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('posts');
-    }
+public function down()
+{
+    Schema::dropIfExists('posts');
+}
 };
