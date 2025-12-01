@@ -1,0 +1,47 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class MenuSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('menus')->insert([
+            [
+                'name' => 'Trang chủ',
+                'link' => '/',
+                'type' => 'custom',
+                'position' => 'mainmenu',
+                'sort_order' => 1,
+                'created_at' => now(),
+                'created_by' => 1,
+                'status' => 1
+            ],
+            [
+                'name' => 'Whey Protein',
+                'link' => '/products/whey',
+                'type' => 'category',
+                'table_id' => 1,
+                'position' => 'mainmenu',
+                'sort_order' => 2,
+                'created_at' => now(),
+                'created_by' => 1,
+                'status' => 1
+            ],
+            [
+                'name' => 'Mass Gainer',
+                'link' => '/products/mass',
+                'type' => 'category',
+                'table_id' => 2,
+                'position' => 'mainmenu',
+                'sort_order' => 3,
+                'created_at' => now(),
+                'created_by' => 1,
+                'status' => 1
+            ]
+        ]);
+    }
+}
