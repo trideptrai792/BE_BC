@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductImageController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\FlashSaleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,3 +82,19 @@ Route::prefix('posts')->group(function () {
     Route::delete('/{post}', [PostController::class, 'destroy']);
 });
 
+
+
+
+// fash sale
+
+Route::get('/flash-sale', [FlashSaleController::class, 'index']);
+
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    // CRUD flash sale cho ADMIN
+    Route::get('/admin/flash-sales', [FlashSaleController::class, 'adminIndex']);
+    Route::post('/admin/flash-sales', [FlashSaleController::class, 'store']);
+    Route::put('/admin/flash-sales/{flashSale}', [FlashSaleController::class, 'update']);
+    Route::delete('/admin/flash-sales/{flashSale}', [FlashSaleController::class, 'destroy']);
+});

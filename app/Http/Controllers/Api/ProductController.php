@@ -54,6 +54,8 @@ class ProductController extends Controller
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
+   $data['price_buy'] = $data['price'];
+    unset($data['price']);
 
         $product = Product::create($data);
 
@@ -78,6 +80,8 @@ class ProductController extends Controller
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
+   $data['price_buy'] = $data['price'];
+    unset($data['price']);
 
         $product->update($data);
 
