@@ -56,6 +56,40 @@ class AuthController extends Controller
             'user' => $request->user(),
         ]);
     }
+   
+      
+public function register(Request $request)
+    {
+        // 1. Validate dữ liệu từ FE
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'phone'    => 'required|string|max:20',
+            'password' => 'required|string|min:6',
+        ]);
+
+        // 2. Tạo user. LƯU Ý: cột là `roles` (số nhiều)
+        $user = User::create([
+            'name'       => $validated['name'],
+            'email'      => $validated['email'],
+            'phone'      => $validated['phone'],
+            'password'   => Hash::make($validated['password']),
+            'roles'      => 'customer',   // dùng đúng tên cột
+            'username'   => $validated['email'] ?? null, // nếu cột username NOT NULL thì gán tạm
+            'avatar'     => null,
+
+        ]);
+
+        // 3. Tạo token Sanctum
+        $token = $user->createToken('api_token')->plainTextToken;
+
+        // 4. Trả về JSON cho FE
+        return response()->json([
+            'message' => 'Đăng ký thành công',
+            'token'   => $token,
+            'user'    => $user,
+        ], 201);
+    }
 
     // Đăng xuất: xoá token hiện tại
     public function logout(Request $request)

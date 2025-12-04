@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\ProductImageController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\FlashSaleController;
+use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\AdminUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,3 +100,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/admin/flash-sales/{flashSale}', [FlashSaleController::class, 'update']);
     Route::delete('/admin/flash-sales/{flashSale}', [FlashSaleController::class, 'destroy']);
 });
+
+
+
+Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect']);
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
+
+
+
+//xem user va dang ky 
+Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register']);
+// Admin xem danh sách user
+Route::middleware(['auth:sanctum', 'admin'])
+    ->get('/admin/users', [AdminUserController::class, 'index']);
