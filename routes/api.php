@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\FlashSaleController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\AdminUserController;
+use App\Http\Controllers\Api\MenuController;
 
 /*
 |--------------------------------------------------------------------------
@@ -112,5 +113,23 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/register', [AuthController::class, 'register']);
 // Admin xem danh sách user
-Route::middleware(['auth:sanctum', 'admin'])
-    ->get('/admin/users', [AdminUserController::class, 'index']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('admin/users', [AdminUserController::class, 'index']);
+    Route::get('admin/users/{id}', [AdminUserController::class, 'show']);
+    Route::put('admin/users/{id}', [AdminUserController::class, 'update']);
+    Route::delete('admin/users/{id}', [AdminUserController::class, 'destroy']);
+});
+
+
+
+
+    // Client
+Route::get('/menus', [MenuController::class, 'index']);
+
+// Admin
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/admin/menus', [MenuController::class, 'adminIndex']);
+    Route::post('/admin/menus', [MenuController::class, 'store']);
+    Route::put('/admin/menus/{menu}', [MenuController::class, 'update']);
+    Route::delete('/admin/menus/{menu}', [MenuController::class, 'destroy']);
+});

@@ -41,7 +41,15 @@ class MenuSeeder extends Seeder
                 'created_at' => now(),
                 'created_by' => 1,
                 'status' => 1
-            ]
+            ],
+                [
+        'name'       => 'Giới thiệu',
+        'link'       => '/gioi-thieu',
+        'type'       => 'page',
+        'position'   => 'footermenu',
+        'sort_order' => 1,
+        'status'     => 1,
+    ]
         ]);
     }
 }
