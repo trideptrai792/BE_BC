@@ -17,23 +17,6 @@ class CategoryController extends Controller
             'data' => $categories,
         ]);
     }
-    public function show($slug)
-{
-    $category = \App\Models\Category::where('slug', $slug)->first();
-
-    if (!$category) {
-        return response()->json([
-            "message" => "Category not found",
-            "data" => null
-        ], 404);
-    }
-
-    return response()->json([
-        "data" => $category
-    ], 200);
-}
-
-    
 
     // POST /api/categories  (THÊM)
     public function store(Request $request)

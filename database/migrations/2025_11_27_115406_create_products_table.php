@@ -9,23 +9,24 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
- public function up()
-{
-    Schema::create('products', function (Blueprint $table) {
-        $table->id();
-        $table->unsignedInteger('category_id');
-        $table->string('name');
-        $table->string('slug');
-        $table->string('thumbnail');
-        $table->longText('content');
-        $table->tinyText('description')->nullable();
-        $table->decimal('price_buy', 12, 2);
-        $table->timestamps();
-        $table->unsignedInteger('created_by')->default(1);
-        $table->unsignedInteger('updated_by')->nullable();
-        $table->unsignedTinyInteger('status')->default(1);
-    });
-}
+    public function up()
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedInteger('category_id');
+            $table->string('name');
+            $table->string('slug');
+            $table->string('thumbnail');
+            $table->longText('content');
+            $table->tinyText('description')->nullable();
+            $table->decimal('price_buy', 12, 2);
+            $table->unsignedInteger('stock')->default(0);
+            $table->timestamps();
+            $table->unsignedInteger('created_by')->default(1);
+            $table->unsignedInteger('updated_by')->nullable();
+            $table->unsignedTinyInteger('status')->default(1);
+        });
+    }
 
 
     /**

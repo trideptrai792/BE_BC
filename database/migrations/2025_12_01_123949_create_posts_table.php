@@ -8,27 +8,29 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('posts', function (Blueprint $table) {
-            $table->id();
+        if (! Schema::hasTable('posts')) {
+            Schema::create('posts', function (Blueprint $table) {
+                $table->id();
 
-            $table->unsignedInteger('topic_id')->nullable();
+                $table->unsignedInteger('topic_id')->nullable();
 
-            $table->string('title');
-            $table->string('slug')->unique();
+                $table->string('title');
+                $table->string('slug')->unique();
 
-            $table->string('thumbnail')->nullable();
-            $table->text('excerpt')->nullable();
-            $table->longText('content')->nullable();
+                $table->string('thumbnail')->nullable();
+                $table->text('excerpt')->nullable();
+                $table->longText('content')->nullable();
 
-            $table->enum('post_type', ['post', 'page'])->default('post');
+                $table->enum('post_type', ['post', 'page'])->default('post');
 
-            $table->unsignedTinyInteger('status')->default(1);
+                $table->unsignedTinyInteger('status')->default(1);
 
-            $table->unsignedInteger('created_by')->nullable();
-            $table->unsignedInteger('updated_by')->nullable();
+                $table->unsignedInteger('created_by')->nullable();
+                $table->unsignedInteger('updated_by')->nullable();
 
-            $table->timestamps();
-        });
+                $table->timestamps();
+            });
+        }
     }
 
     public function down()

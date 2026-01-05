@@ -10,7 +10,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('users')->insert([
+        $users = [
             [
                 'name' => 'Admin',
                 'email' => 'admin@example.com',
@@ -19,8 +19,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'roles' => 'admin',
                 'avatar' => null,
-                'created_by' => 1,
-                'created_at' => now()
             ],
             [
                 'name' => 'Customer A',
@@ -30,9 +28,18 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'roles' => 'customer',
                 'avatar' => null,
-                'created_by' => 1,
-                'created_at' => now()
-            ]
-        ]);
+            ],
+        ];
+
+        foreach ($users as $user) {
+            DB::table('users')->updateOrInsert(
+                ['email' => $user['email']],
+                $user + [
+                    'created_by' => 1,
+                    'updated_at' => now(),
+                    'created_at' => now(),
+                ]
+            );
+        }
     }
 }

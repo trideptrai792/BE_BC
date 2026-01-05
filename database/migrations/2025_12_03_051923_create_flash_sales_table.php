@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->string('badge_left', 50)->nullable();      // "FREESHIP"
             $table->string('badge_right', 50)->nullable();     // "TẶNG QUÀ" / "ƯU ĐÃI SỐC"
             $table->string('benefit_1', 100)->nullable();      // "Miễn phí giao hàng"
-            $table->string('benefit_2', 100)->nullable();      // "Tặng kèm bình lắc"
+            $table->string('benefit_2', 100)->nullable()    ;      // "Tặng kèm bình lắc"
 
             $table->timestamp('start_at')->nullable();         // thời gian bắt đầu
             $table->timestamp('end_at')->nullable();           // thời gian kết thúc (để FE đếm ngược)

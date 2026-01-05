@@ -10,7 +10,15 @@ use App\Http\Controllers\Api\FlashSaleController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\MenuController;
-
+use App\Http\Controllers\Api\ProductStoreController;
+use App\Models\Attribute;
+use App\Http\Controllers\Api\ProductVariantController;
+use App\Models\ProductAttribute;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Api\ProductSaleController;
+use App\Http\Controllers\Api\ProductStoreLogController;
+use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\AdminCartController;
 /*
 |--------------------------------------------------------------------------
 | PRODUCT ROUTES
@@ -18,6 +26,7 @@ use App\Http\Controllers\Api\MenuController;
 */
 
 Route::prefix('products')->group(function () {
+       Route::get('/new', [ProductController::class, 'productNew']); 
     // Client
     Route::get('/', [ProductController::class, 'index']);      // GET /api/products?category=slug
     Route::get('/{slug}', [ProductController::class, 'show']); // GET /api/products/{slug}
@@ -25,7 +34,8 @@ Route::prefix('products')->group(function () {
     // Admin (dùng id model binding)
     Route::post('/', [ProductController::class, 'store']);              // POST   /api/products
     Route::put('/{product}', [ProductController::class, 'update']);     // PUT    /api/products/{id}
-    Route::delete('/{product}', [ProductController::class, 'destroy']); // DELETE /api/products/{id}
+    Route::delete('/{product}', [ProductController::class, 'destroy']); 
+    // DELETE /api/products/{id}
 });
 
 /*
@@ -127,9 +137,77 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/menus', [MenuController::class, 'index']);
 
 // Admin
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::get('/admin/menus', [MenuController::class, 'adminIndex']);
-    Route::post('/admin/menus', [MenuController::class, 'store']);
-    Route::put('/admin/menus/{menu}', [MenuController::class, 'update']);
-    Route::delete('/admin/menus/{menu}', [MenuController::class, 'destroy']);
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/carts', [AdminCartController::class, 'index']);
+    Route::get('/carts/{cart}', [AdminCartController::class, 'show']);
+
+    Route::get('/menus', [MenuController::class, 'adminIndex']);
+    Route::post('/menus', [MenuController::class, 'store']);
+    Route::get('/menus/{menu}', [MenuController::class, 'show']);
+    Route::put('/menus/{menu}', [MenuController::class, 'update']);
+    Route::delete('/menus/{menu}', [MenuController::class, 'destroy']);
+
+    Route::get('/product-stores', [ProductStoreController::class, 'index']);
+    Route::post('/product-stores', [ProductStoreController::class, 'store']);
+    Route::put('/product-stores/{productStore}', [ProductStoreController::class, 'update']);
+    Route::delete('/product-stores/{productStore}', [ProductStoreController::class, 'destroy']);
+});
+
+
+
+Route::get('/attributes', function () {
+    return Attribute::with('values')->get(); // trả kèm product_attribute_values
+});
+
+
+
+Route::post('/product-variants', [ProductVariantController::class, 'store']);
+Route::post('/product-variants/{variant}/values', [ProductVariantController::class, 'addValue']);
+
+
+
+Route::post('/product-attributes', function (Request $r) {
+    $data = $r->validate([
+        'product_id'   => 'required|exists:products,id',
+        'attribute_id' => 'required|exists:attributes,id',
+        'value'        => 'required|string|max:255',
+    ]);
+    $pa = ProductAttribute::create($data);
+    return response()->json($pa, 201);
+});
+
+
+
+Route::prefix('admin')->middleware('auth:api')->group(function () {
+    Route::get('/product-sales', [ProductSaleController::class, 'index']);
+    Route::post('/product-sales', [ProductSaleController::class, 'store']);
+    Route::put('/product-sales/{productSale}', [ProductSaleController::class, 'update']);
+    Route::delete('/product-sales/{productSale}', [ProductSaleController::class, 'destroy']);
+
+
+
+
+});
+
+
+
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::get('/product-store-logs', [ProductStoreLogController::class, 'index']);
+});
+
+
+//gio hang 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/cart', [CartController::class, 'show']);
+    Route::post('/cart/items', [CartController::class, 'addItem']);
+    Route::patch('/cart/items/{id}', [CartController::class, 'updateItem']);
+    Route::delete('/cart/items/{id}', [CartController::class, 'removeItem']);
+    Route::delete('/cart/clear', [CartController::class, 'clear']);
+    Route::patch('/cart', [CartController::class, 'updateCart']);
+});
+
+
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/carts', [AdminCartController::class, 'index']);
+    Route::get('/carts/{cart}', [AdminCartController::class, 'show']);
 });
