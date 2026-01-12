@@ -8,9 +8,12 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
-        "laravel/socialite": "^5.12",
         "laravel/sanctum": "^4.2",
-        "laravel/tinker": "^2.10.1"
+        "laravel/socialite": "^5.12",
+        "laravel/tinker": "^2.10.1",
+        "league/oauth2-google": "^4.1",
+        "php-open-source-saver/jwt-auth": "^2.8",
+        "symfony/google-mailer": "^7.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

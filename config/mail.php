@@ -37,6 +37,14 @@ return [
 
     'mailers' => [
 
+        'gmail' => [
+            'transport' => 'gmail',
+            'client_id' => env('GOOGLE_MAILER_CLIENT_ID'),
+            'client_secret' => env('GOOGLE_MAILER_CLIENT_SECRET'),
+            'refresh_token' => env('GOOGLE_MAILER_REFRESH_TOKEN'),
+            'username' => env('GOOGLE_MAILER_EMAIL'),
+        ],
+
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),

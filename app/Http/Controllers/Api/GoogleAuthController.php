@@ -8,6 +8,7 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -34,7 +35,7 @@ class GoogleAuthController extends Controller
                 'password' => Hash::make(Str::random(32))]
         );
 
-        $token = $user->createToken('api_token')->plainTextToken;
+        $token = Auth::guard('api')->login($user);
 
         // Lấy redirect FE từ query (như bạn đã dùng)
         $redirect = $request->query(

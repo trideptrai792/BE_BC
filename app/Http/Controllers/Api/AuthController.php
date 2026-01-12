@@ -6,61 +6,67 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // Đăng nhập: email/username + password -> trả về token
     public function login(Request $request)
     {
         $request->validate([
-            'login'    => 'required|string', // email hoặc username
+            'login' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        // Xác định login theo email hay username
-        $field = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $login = $request->login;
+        $password = $request->password;
 
-        $user = User::where($field, $request->login)->first();
+        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        $user = User::where($field, $login)->first();
+
+        if (!$user || !Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
                 'login' => ['Tài khoản hoặc mật khẩu không đúng.'],
             ]);
         }
 
-        // Xoá token cũ (nếu muốn)
-        $user->tokens()->delete();
+        $credentials = [
+            $field => $login,
+            'password' => $password,
+        ];
 
-        // Tạo token mới cho Next.js / mobile
-        $token = $user->createToken('web_token')->plainTextToken;
+        if (!$token = Auth::guard('api')->attempt($credentials)) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $u = Auth::guard('api')->user();
 
         return response()->json([
-            'user'  => [
-                'id'       => $user->id,
-                'name'     => $user->name,
-                'email'    => $user->email,
-                'username' => $user->username,
-                'phone'    => $user->phone,
-                'roles'    => $user->roles,
-                'avatar'   => $user->avatar,
+            'user' => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'username' => $u->username,
+                'phone' => $u->phone,
+                'roles' => $u->roles,
+                'avatar' => $u->avatar,
             ],
             'token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => Auth::guard('api')->factory()->getTTL() * 60,
         ]);
     }
 
-    // Lấy thông tin user từ token
-    public function me(Request $request)
+    public function me()
     {
         return response()->json([
-            'user' => $request->user(),
+            'user' => Auth::guard('api')->user(),
         ]);
     }
-   
-      
-public function register(Request $request)
+
+    public function register(Request $request)
     {
-        // 1. Validate dữ liệu từ FE
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
@@ -68,33 +74,30 @@ public function register(Request $request)
             'password' => 'required|string|min:6',
         ]);
 
-        // 2. Tạo user. LƯU Ý: cột là `roles` (số nhiều)
         $user = User::create([
-            'name'       => $validated['name'],
-            'email'      => $validated['email'],
-            'phone'      => $validated['phone'],
-            'password'   => Hash::make($validated['password']),
-            'roles'      => 'customer',   // dùng đúng tên cột
-            'username'   => $validated['email'] ?? null, // nếu cột username NOT NULL thì gán tạm
-            'avatar'     => null,
-
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'phone'    => $validated['phone'],
+            'password' => Hash::make($validated['password']),
+            'roles'    => 'customer',
+            'username' => $validated['email'],
+            'avatar'   => null,
         ]);
 
-        // 3. Tạo token Sanctum
-        $token = $user->createToken('api_token')->plainTextToken;
+        $token = Auth::guard('api')->login($user);
 
-        // 4. Trả về JSON cho FE
         return response()->json([
             'message' => 'Đăng ký thành công',
             'token'   => $token,
+            'token_type' => 'bearer',
+            'expires_in' => Auth::guard('api')->factory()->getTTL() * 60,
             'user'    => $user,
         ], 201);
     }
 
-    // Đăng xuất: xoá token hiện tại
-    public function logout(Request $request)
+    public function logout()
     {
-        $request->user()->currentAccessToken()->delete();
+        Auth::guard('api')->logout();
 
         return response()->json([
             'message' => 'Đã đăng xuất',
