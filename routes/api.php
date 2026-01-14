@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
+use App\Http\Controllers\Api\AdminOrderController;
+use App\Http\Controllers\Api\OrderController;
+
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
@@ -20,6 +23,7 @@ use App\Http\Controllers\Api\AdminCartController;
 use App\Http\Controllers\Api\ProductVariantController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\VNPayController;
+
 use App\Models\Attribute;
 use App\Models\ProductAttribute;
 
@@ -106,8 +110,8 @@ Route::get('/attributes', function () {
 
 
 /* ===================== VARIANTS / PRODUCT ATTRIBUTES ===================== */
-Route::post('/product-variants', [ProductVariantController::class, 'store']);                    // /api/product-variants
-Route::post('/product-variants/{variant}/values', [ProductVariantController::class, 'addValue']); // /api/product-variants/{id}/values
+Route::post('/product-variants', [ProductVariantController::class, 'store']);                       // /api/product-variants
+Route::post('/product-variants/{variant}/values', [ProductVariantController::class, 'addValue']);   // /api/product-variants/{id}/values
 
 Route::post('/product-attributes', function (Request $r) {
     $data = $r->validate([
@@ -120,62 +124,73 @@ Route::post('/product-attributes', function (Request $r) {
 }); // /api/product-attributes
 
 
-/* ===================== CART (CLIENT, cần JWT) ===================== */
+/* ===================== AUTH USER ROUTES (JWT) ===================== */
 Route::middleware('auth:api')->group(function () {
-    Route::get('/cart', [CartController::class, 'show']);                 // /api/cart
-    Route::post('/cart/items', [CartController::class, 'addItem']);       // /api/cart/items
+    /* ===== CART (CLIENT) ===== */
+    Route::get('/cart', [CartController::class, 'show']);                    // /api/cart
+    Route::post('/cart/items', [CartController::class, 'addItem']);          // /api/cart/items
     Route::patch('/cart/items/{id}', [CartController::class, 'updateItem']); // /api/cart/items/{id}
     Route::delete('/cart/items/{id}', [CartController::class, 'removeItem']); // /api/cart/items/{id}
-    Route::delete('/cart/clear', [CartController::class, 'clear']);       // /api/cart/clear
-    Route::patch('/cart', [CartController::class, 'updateCart']);         // /api/cart
+    Route::delete('/cart/clear', [CartController::class, 'clear']);          // /api/cart/clear
+    Route::patch('/cart', [CartController::class, 'updateCart']);            // /api/cart
 
-    // Checkout (user login)
-    Route::post('/checkout', [CheckoutController::class, 'checkout']);
+    /* ===== CHECKOUT ===== */
+    Route::post('/checkout', [CheckoutController::class, 'checkout']);       // /api/checkout
+
+    /* ===== USER ORDERS (đơn của user, đã xử lý) ===== */
+    Route::get('/orders', [OrderController::class, 'index']);                // /api/orders
+    Route::get('/orders/{order}', [OrderController::class, 'show']);         // /api/orders/{order}
 });
 
 
 /* ===================== ADMIN (JWT + admin middleware) ===================== */
 // prefix('admin') => tất cả URL bắt đầu bằng /api/admin/...
 Route::middleware(['auth:api', 'admin'])->prefix('admin')->group(function () {
-    // Admin carts
-    Route::get('/carts', [AdminCartController::class, 'index']);      // /api/admin/carts
-    Route::get('/carts/{cart}', [AdminCartController::class, 'show']); // /api/admin/carts/{id}
+    /* ===== Admin carts ===== */
+    Route::get('/carts', [AdminCartController::class, 'index']);        // /api/admin/carts
+    Route::get('/carts/{cart}', [AdminCartController::class, 'show']);  // /api/admin/carts/{id}
 
-    // Admin users
-    Route::get('/users', [AdminUserController::class, 'index']);        // /api/admin/users
-    Route::get('/users/{id}', [AdminUserController::class, 'show']);    // /api/admin/users/{id}
-    Route::put('/users/{id}', [AdminUserController::class, 'update']);  // /api/admin/users/{id}
+    /* ===== Admin orders ===== */
+    Route::get('/orders', [AdminOrderController::class, 'index']);                      // /api/admin/orders
+    Route::get('/orders/{order}', [AdminOrderController::class, 'show']);               // /api/admin/orders/{order}
+    Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus']); // /api/admin/orders/{order}/status
+
+    /* ===== Admin users ===== */
+    Route::get('/users', [AdminUserController::class, 'index']);           // /api/admin/users
+    Route::get('/users/{id}', [AdminUserController::class, 'show']);       // /api/admin/users/{id}
+    Route::put('/users/{id}', [AdminUserController::class, 'update']);     // /api/admin/users/{id}
     Route::delete('/users/{id}', [AdminUserController::class, 'destroy']); // /api/admin/users/{id}
 
-    // Admin flash sales
-    Route::get('/flash-sales', [FlashSaleController::class, 'adminIndex']);     // /api/admin/flash-sales
-    Route::post('/flash-sales', [FlashSaleController::class, 'store']);         // /api/admin/flash-sales
-    Route::put('/flash-sales/{flashSale}', [FlashSaleController::class, 'update']); // /api/admin/flash-sales/{id}
-    Route::delete('/flash-sales/{flashSale}', [FlashSaleController::class, 'destroy']); // /api/admin/flash-sales/{id}
+    /* ===== Admin flash sales ===== */
+    Route::get('/flash-sales', [FlashSaleController::class, 'adminIndex']);              // /api/admin/flash-sales
+    Route::post('/flash-sales', [FlashSaleController::class, 'store']);                  // /api/admin/flash-sales
+    Route::put('/flash-sales/{flashSale}', [FlashSaleController::class, 'update']);      // /api/admin/flash-sales/{id}
+    Route::delete('/flash-sales/{flashSale}', [FlashSaleController::class, 'destroy']);  // /api/admin/flash-sales/{id}
 
-    // Admin menus
-    Route::get('/menus', [MenuController::class, 'adminIndex']);          // /api/admin/menus
-    Route::post('/menus', [MenuController::class, 'store']);              // /api/admin/menus
-    Route::get('/menus/{menu}', [MenuController::class, 'show']);         // /api/admin/menus/{id}
-    Route::put('/menus/{menu}', [MenuController::class, 'update']);       // /api/admin/menus/{id}
-    Route::delete('/menus/{menu}', [MenuController::class, 'destroy']);   // /api/admin/menus/{id}
+    /* ===== Admin menus ===== */
+    Route::get('/menus', [MenuController::class, 'adminIndex']);        // /api/admin/menus
+    Route::post('/menus', [MenuController::class, 'store']);            // /api/admin/menus
+    Route::get('/menus/{menu}', [MenuController::class, 'show']);       // /api/admin/menus/{id}
+    Route::put('/menus/{menu}', [MenuController::class, 'update']);     // /api/admin/menus/{id}
+    Route::delete('/menus/{menu}', [MenuController::class, 'destroy']); // /api/admin/menus/{id}
 
-    // Admin product stores
-    Route::get('/product-stores', [ProductStoreController::class, 'index']);      // /api/admin/product-stores
-    Route::post('/product-stores', [ProductStoreController::class, 'store']);     // /api/admin/product-stores
+    /* ===== Admin product stores ===== */
+    Route::get('/product-stores', [ProductStoreController::class, 'index']);                 // /api/admin/product-stores
+    Route::post('/product-stores', [ProductStoreController::class, 'store']);                // /api/admin/product-stores
     Route::put('/product-stores/{productStore}', [ProductStoreController::class, 'update']); // /api/admin/product-stores/{id}
     Route::delete('/product-stores/{productStore}', [ProductStoreController::class, 'destroy']); // /api/admin/product-stores/{id}
 
-    // Admin product sales
-    Route::get('/product-sales', [ProductSaleController::class, 'index']);        // /api/admin/product-sales
-    Route::post('/product-sales', [ProductSaleController::class, 'store']);       // /api/admin/product-sales
-    Route::put('/product-sales/{productSale}', [ProductSaleController::class, 'update']); // /api/admin/product-sales/{id}
+    /* ===== Admin product sales ===== */
+    Route::get('/product-sales', [ProductSaleController::class, 'index']);                   // /api/admin/product-sales
+    Route::post('/product-sales', [ProductSaleController::class, 'store']);                  // /api/admin/product-sales
+    Route::put('/product-sales/{productSale}', [ProductSaleController::class, 'update']);    // /api/admin/product-sales/{id}
     Route::delete('/product-sales/{productSale}', [ProductSaleController::class, 'destroy']); // /api/admin/product-sales/{id}
 
-    // Admin product store logs
-    Route::get('/product-store-logs', [ProductStoreLogController::class, 'index']); // /api/admin/product-store-logs
+    /* ===== Admin product store logs ===== */
+    Route::get('/product-store-logs', [ProductStoreLogController::class, 'index']);          // /api/admin/product-store-logs
 });
 
-// VNPay callbacks (public)
+
+/* ===================== VNPAY CALLBACKS (public) ===================== */
 Route::get('/vnpay/return', [VNPayController::class, 'returnUrl']);
 Route::get('/vnpay/ipn', [VNPayController::class, 'ipn']);

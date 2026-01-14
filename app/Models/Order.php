@@ -5,7 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
-{
+{ public const STATUS_LABELS = [
+        0 => 'Đã hủy',
+        1 => 'Chờ xác nhận',
+        2 => 'Đã xác nhận',
+        3 => 'Đang giao',
+        4 => 'Đã giao',
+        5 => 'Hoàn tất',
+    ];
+
+    protected $appends = ['status_text'];
+
+    public function getStatusTextAttribute(): string
+    {
+        $s = (int) ($this->attributes['status'] ?? -1);
+        return self::STATUS_LABELS[$s] ?? 'Không xác định';
+    }
+
     protected $table = 'orders';
 
     protected $fillable = [
