@@ -9,6 +9,7 @@ class OrderDetail extends Model
 {
     protected $table = 'order_details';
     public $timestamps = false;
+
     protected $fillable = [
         'order_id',
         'product_id',
@@ -17,6 +18,15 @@ class OrderDetail extends Model
         'amount',
         'discount',
     ];
+
+    // ✅ thêm dòng này
+    protected $appends = ['quantity'];
+
+    // ✅ thêm accessor này
+    public function getQuantityAttribute(): int
+    {
+        return (int) ($this->attributes['qty'] ?? 0);
+    }
 
     public function product(): BelongsTo
     {
